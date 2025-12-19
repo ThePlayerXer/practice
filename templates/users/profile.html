@@ -1,8 +1,129 @@
 ﻿{% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Профиль{% endblock %}
+{% block title %}Профиль - PC Store{% endblock %}
 
 {% block content %}
-<h1>Профиль</h1>
-<p>Профиль находится в разработке.</p>
+<div class="profile-container">
+    <div class="container">
+        <h1 class="page-title">Личный кабинет</h1>
+        
+        <div class="profile-layout">
+            <!-- Меню профиля -->
+            <aside class="profile-sidebar">
+                <div class="profile-menu">
+                    <div class="profile-info">
+                        <div class="profile-avatar">
+                            {% if user.avatar %}
+                            <img src="{{ user.avatar.url }}" alt="{{ user.email }}">
+                            {% else %}
+                            <i class="fas fa-user"></i>
+                            {% endif %}
+                        </div>
+                        <h3 class="profile-name">{{ user.get_full_name|default:user.email }}</h3>
+                        <p class="profile-email">{{ user.email }}</p>
+                    </div>
+                    
+                    <nav class="profile-nav">
+                        <a href="{% url 'users:profile' %}" class="profile-nav-link active">
+                            <i class="fas fa-user"></i> Личные данные
+                        </a>
+                        <a href="{% url 'users:orders' %}" class="profile-nav-link">
+                            <i class="fas fa-shopping-bag"></i> Мои заказы
+                        </a>
+                        <a href="#" class="profile-nav-link">
+                            <i class="fas fa-heart"></i> Избранное
+                        </a>
+                        <a href="#" class="profile-nav-link">
+                            <i class="fas fa-cog"></i> Настройки
+                        </a>
+                        <a href="{% url 'users:logout' %}" class="profile-nav-link">
+                            <i class="fas fa-sign-out-alt"></i> Выйти
+                        </a>
+                    </nav>
+                </div>
+            </aside>
+            
+            <!-- Основная информация -->
+            <main class="profile-main">
+                <div class="profile-section">
+                    <h2 class="section-title">Личные данные</h2>
+                    
+                    <form method="post" class="profile-form">
+                        {% csrf_token %}
+                        
+                        <div class="form-group">
+                            <label class="form-label">Имя</label>
+                            <input type="text" name="first_name" value="{{ user.first_name|default:'' }}" class="form-input">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Фамилия</label>
+                            <input type="text" name="last_name" value="{{ user.last_name|default:'' }}" class="form-input">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Email</label>
+                            <input type="email" value="{{ user.email }}" class="form-input" disabled>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Телефон</label>
+                            <input type="tel" name="phone" value="{{ user.phone|default:'' }}" class="form-input">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Адрес</label>
+                            <textarea name="address" class="form-textarea">{{ user.address|default:'' }}</textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+                    </form>
+                </div>
+                
+                <div class="profile-section">
+                    <h2 class="section-title">Мои заказы</h2>
+                    
+                    <div class="orders-list">
+                        {% for order in orders %}
+                        <div class="order-card">
+                            <div class="order-header">
+                                <div class="order-info">
+                                    <span class="order-number">Заказ #{{ order.order_number }}</span>
+                                    <span class="order-date">{{ order.created_at|date:"d.m.Y H:i" }}</span>
+                                </div>
+                                <div class="order-status {{ order.status }}">
+                                    {{ order.get_status_display }}
+                                </div>
+                            </div>
+                            
+                            <div class="order-items">
+                                {% for item in order.items.all %}
+                                <div class="order-item">
+                                    <span class="order-item-name">{{ item.product_name }}</span>
+                                    <span class="order-item-quantity">{{ item.quantity }} шт.</span>
+                                    <span class="order-item-price">{{ item.price }} ₽</span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            
+                            <div class="order-footer">
+                                <div class="order-total">
+                                    Итого: <span class="total-price">{{ order.total_price }} ₽</span>
+                                </div>
+                                <a href="#" class="btn btn-outline btn-small">Подробнее</a>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="no-orders">
+                            <p>У вас пока нет заказов</p>
+                            <a href="{% url 'products:catalog' %}" class="btn btn-primary">Сделать первый заказ</a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</div>
 {% endblock %}

@@ -1,11 +1,127 @@
 ﻿{% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Главная{% endblock %}
+{% block title %}Главная - PC Store{% endblock %}
 
 {% block content %}
-<div class="text-center py-5">
-    <h1>Добро пожаловать в компьютерный магазин!</h1>
-    <p class="lead">Сайт находится в разработке.</p>
-    <a href="{% url 'products:catalog' %}" class="btn btn-primary btn-lg">Перейти в каталог</a>
-</div>
+<!-- Баннер -->
+<section class="banner">
+    <div class="container">
+        <div class="banner-content">
+            <h1 class="banner-title">Собери свой идеальный ПК</h1>
+            <p class="banner-text">Лучшие комплектующие по доступным ценам с гарантией качества</p>
+            <a href="{% url 'products:catalog' %}" class="btn btn-primary">Перейти в каталог</a>
+        </div>
+    </div>
+</section>
+
+<!-- Категории товаров -->
+<section class="categories">
+    <div class="container">
+        <h2 class="section-title">Категории товаров</h2>
+        <div class="categories-grid">
+            <a href="{% url 'products:catalog' %}?category=processor" class="category-card">
+                <div class="category-icon">
+                    <i class="fas fa-microchip"></i>
+                </div>
+                <h3 class="category-title">Процессоры</h3>
+            </a>
+            <a href="{% url 'products:catalog' %}?category=videocard" class="category-card">
+                <div class="category-icon">
+                    <i class="fas fa-gamepad"></i>
+                </div>
+                <h3 class="category-title">Видеокарты</h3>
+            </a>
+            <a href="{% url 'products:catalog' %}?category=motherboard" class="category-card">
+                <div class="category-icon">
+                    <i class="fas fa-microchip"></i>
+                </div>
+                <h3 class="category-title">Платы</h3>
+            </a>
+            <a href="{% url 'products:catalog' %}?category=memory" class="category-card">
+                <div class="category-icon">
+                    <i class="fas fa-memory"></i>
+                </div>
+                <h3 class="category-title">Памяти</h3>
+            </a>
+            <a href="{% url 'products:catalog' %}?category=storage" class="category-card">
+                <div class="category-icon">
+                    <i class="fas fa-hdd"></i>
+                </div>
+                <h3 class="category-title">Диски</h3>
+            </a>
+            <a href="{% url 'products:catalog' %}?category=power" class="category-card">
+                <div class="category-icon">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <h3 class="category-title">Блоки</h3>
+            </a>
+            <a href="{% url 'products:catalog' %}?category=case" class="category-card">
+                <div class="category-icon">
+                    <i class="fas fa-desktop"></i>
+                </div>
+                <h3 class="category-title">Корпус</h3>
+            </a>
+            <a href="{% url 'products:catalog' %}?category=cooler" class="category-card">
+                <div class="category-icon">
+                    <i class="fas fa-fan"></i>
+                </div>
+                <h3 class="category-title">Кулер</h3>
+            </a>
+            <a href="{% url 'products:catalog' %}?category=other" class="category-card">
+                <div class="category-icon">
+                    <i class="fas fa-ellipsis-h"></i>
+                </div>
+                <h3 class="category-title">Другое</h3>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Популярные товары -->
+<section class="popular-products">
+    <div class="container">
+        <h2 class="section-title">Популярные товары</h2>
+        <div class="products-grid">
+            {% for product in popular_products %}
+            <div class="product-card">
+                <div class="product-image">
+                    {% if product.image %}
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                    {% else %}
+                    <div class="no-image">
+                        <i class="fas fa-image"></i>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="product-info">
+                    <h3 class="product-title">{{ product.name }}</h3>
+                    <p class="product-description">{{ product.description|truncatewords:15 }}</p>
+                    <div class="product-price">
+                        {% if product.discount_price %}
+                        <span class="price-old">{{ product.price }} ₽</span>
+                        <span class="price-new">{{ product.discount_price }} ₽</span>
+                        {% else %}
+                        <span class="price">{{ product.price }} ₽</span>
+                        {% endif %}
+                    </div>
+                    <div class="product-actions">
+                        <a href="{{ product.get_absolute_url }}" class="btn btn-outline">Подробнее</a>
+                        <form action="{% url 'cart:cart_add' product.id %}" method="post" class="add-to-cart-form">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-cart-plus"></i> В корзину
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="no-products">
+                <p>Популярные товары скоро появятся</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
 {% endblock %}

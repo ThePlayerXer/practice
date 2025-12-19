@@ -1,28 +1,174 @@
 ﻿{% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Каталог товаров{% endblock %}
+{% block title %}Каталог товаров - PC Store{% endblock %}
 
 {% block content %}
-<h1>Каталог товаров</h1>
-<div class="row">
-    {% for product in products %}
-    <div class="col-md-4 mb-4">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">{{ product.name }}</h5>
-                <p class="card-text">{{ product.description|truncatewords:20 }}</p>
-                <p class="card-text"><strong>Цена: {{ product.price }} руб.</strong></p>
-                <form action="{% url 'cart:cart_add' product.id %}" method="post">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-primary">В корзину</button>
-                </form>
-            </div>
+<div class="catalog-container">
+    <div class="container">
+        <h1 class="page-title">Каталог товаров</h1>
+        
+        <div class="catalog-layout">
+            <!-- Боковая панель с фильтрами -->
+            <aside class="filters-sidebar">
+                <div class="filters-card">
+                    <h3 class="filters-title">Фильтры</h3>
+                    
+                    <form method="get" class="filters-form">
+                        <div class="filter-group">
+                            <label class="filter-label">Категория</label>
+                            <select name="category" class="filter-select">
+                                <option value="">Все категории</option>
+                                <option value="processor" {% if request.GET.category == 'processor' %}selected{% endif %}>Процессоры</option>
+                                <option value="videocard" {% if request.GET.category == 'videocard' %}selected{% endif %}>Видеокарты</option>
+                                <option value="motherboard" {% if request.GET.category == 'motherboard' %}selected{% endif %}>Материнские платы</option>
+                                <option value="memory" {% if request.GET.category == 'memory' %}selected{% endif %}>Оперативная память</option>
+                                <option value="storage" {% if request.GET.category == 'storage' %}selected{% endif %}>Накопители</option>
+                                <option value="power" {% if request.GET.category == 'power' %}selected{% endif %}>Блоки питания</option>
+                                <option value="case" {% if request.GET.category == 'case' %}selected{% endif %}>Корпуса</option>
+                                <option value="cooler" {% if request.GET.category == 'cooler' %}selected{% endif %}>Кулеры</option>
+                                <option value="other" {% if request.GET.category == 'other' %}selected{% endif %}>Другое</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label class="filter-label">Цена, ₽</label>
+                            <div class="price-range">
+                                <input type="number" name="min_price" placeholder="От" value="{{ request.GET.min_price }}" class="price-input">
+                                <span class="price-separator">-</span>
+                                <input type="number" name="max_price" placeholder="До" value="{{ request.GET.max_price }}" class="price-input">
+                            </div>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label class="filter-label">Бренд</label>
+                            <input type="text" name="brand" placeholder="Введите бренд" value="{{ request.GET.brand }}" class="filter-input">
+                        </div>
+                        
+                        <div class="filter-actions">
+                            <button type="submit" class="btn btn-primary">Применить фильтры</button>
+                            <a href="{% url 'products:catalog' %}" class="btn btn-outline">Сбросить</a>
+                        </div>
+                    </form>
+                </div>
+            </aside>
+            
+            <!-- Основной контент с товарами -->
+            <main class="products-main">
+                <div class="products-header">
+                    <div class="products-count">
+                        Найдено товаров: <span>{{ products.count }}</span>
+                    </div>
+                    <div class="products-sort">
+                        <label class="sort-label">Сортировка:</label>
+                        <select class="sort-select">
+                            <option value="price_asc">По возрастанию цены</option>
+                            <option value="price_desc">По убыванию цены</option>
+                            <option value="name_asc">По названию (А-Я)</option>
+                            <option value="name_desc">По названию (Я-А)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="products-grid catalog-grid">
+                    {% for product in products %}
+                    <div class="product-card catalog-card">
+                        <div class="product-image">
+                            {% if product.image %}
+                            <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                            {% else %}
+                            <div class="no-image">
+                                <i class="fas fa-image"></i>
+                            </div>
+                            {% endif %}
+                            {% if product.discount_price %}
+                            <span class="discount-badge">Скидка</span>
+                            {% endif %}
+                        </div>
+                        <div class="product-info">
+                            <div class="product-category">{{ product.category.name }}</div>
+                            <h3 class="product-title">{{ product.name }}</h3>
+                            <p class="product-description">{{ product.description|truncatewords:20 }}</p>
+                            
+                            <div class="product-price">
+                                {% if product.discount_price %}
+                                <div class="price-container">
+                                    <span class="price-old">{{ product.price }} ₽</span>
+                                    <span class="price-new">{{ product.discount_price }} ₽</span>
+                                </div>
+                                {% else %}
+                                <span class="price">{{ product.price }} ₽</span>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="product-availability">
+                                {% if product.stock > 0 %}
+                                <span class="availability in-stock">В наличии</span>
+                                {% else %}
+                                <span class="availability out-of-stock">Нет в наличии</span>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="product-actions">
+                                <a href="{{ product.get_absolute_url }}" class="btn btn-outline">Подробнее</a>
+                                {% if product.stock > 0 %}
+                                <form action="{% url 'cart:cart_add' product.id %}" method="post">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-cart-plus"></i>
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="no-products-message">
+                        <i class="fas fa-search"></i>
+                        <h3>Товары не найдены</h3>
+                        <p>Попробуйте изменить параметры фильтрации</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                {% if is_paginated %}
+                <div class="pagination">
+                    {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}" class="pagination-link">
+                        <i class="fas fa-chevron-left"></i> Назад
+                    </a>
+                    {% endif %}
+                    
+                    {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                    <span class="pagination-link active">{{ num }}</span>
+                    {% else %}
+                    <a href="?page={{ num }}" class="pagination-link">{{ num }}</a>
+                    {% endif %}
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}" class="pagination-link">
+                        Далее <i class="fas fa-chevron-right"></i>
+                    </a>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </main>
         </div>
     </div>
-    {% empty %}
-    <div class="col-12">
-        <p>Товаров пока нет.</p>
-    </div>
-    {% endfor %}
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const sortSelect = document.querySelector('.sort-select');
+    sortSelect.addEventListener('change', function() {
+        const url = new URL(window.location);
+        url.searchParams.set('sort', this.value);
+        window.location.href = url.toString();
+    });
+});
+</script>
 {% endblock %}

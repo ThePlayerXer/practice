@@ -3,30 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Компьютерный магазин{% endblock %}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>{% block title %}PC Store - Магазин компьютерных комплектующих{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <!-- Шапка сайта -->
+    <header class="header">
         <div class="container">
-            <a class="navbar-brand" href="{% url 'home' %}">PC Store</a>
-            <div class="navbar-nav">
-                <a class="nav-link" href="{% url 'products:catalog' %}">Каталог</a>
-                <a class="nav-link" href="{% url 'cart:cart_detail' %}">Корзина</a>
-                <a class="nav-link" href="{% url 'users:login' %}">Войти</a>
-                <a class="nav-link" href="{% url 'users:register' %}">Регистрация</a>
+            <div class="header-content">
+                <!-- Логотип -->
+                <div class="logo">
+                    <a href="{% url 'home' %}">
+                        <i class="fas fa-computer"></i>
+                        <span class="logo-text">PC STORE</span>
+                    </a>
+                </div>
+                
+                <!-- Основное меню -->
+                <nav class="main-nav">
+                    <ul class="nav-list">
+                        <li class="nav-item"><a href="{% url 'home' %}" class="nav-link">Главная</a></li>
+                        <li class="nav-item"><a href="{% url 'products:catalog' %}" class="nav-link">Каталог</a></li>
+                        <li class="nav-item"><a href="{% url 'pages:about' %}" class="nav-link">О нас</a></li>
+                        <li class="nav-item"><a href="{% url 'pages:contacts' %}" class="nav-link">Контакты</a></li>
+                        <li class="nav-item"><a href="{% url 'cart:cart_detail' %}" class="nav-link">
+                            <i class="fas fa-shopping-cart"></i> Корзина
+                            {% if cart_items %}
+                            <span class="cart-count">{{ cart_items|length }}</span>
+                            {% endif %}
+                        </a></li>
+                        <li class="nav-item">
+                            {% if user.is_authenticated %}
+                            <div class="user-menu">
+                                <a href="{% url 'users:profile' %}" class="nav-link">
+                                    <i class="fas fa-user"></i> Профиль
+                                </a>
+                                <div class="user-dropdown">
+                                    <a href="{% url 'users:profile' %}">Мой профиль</a>
+                                    <a href="{% url 'users:orders' %}">Мои заказы</a>
+                                    {% if user.is_staff %}
+                                    <a href="{% url 'admin:index' %}">Админка</a>
+                                    {% endif %}
+                                    <a href="{% url 'users:logout' %}">Выйти</a>
+                                </div>
+                            </div>
+                            {% else %}
+                            <a href="{% url 'users:login' %}" class="nav-link">
+                                <i class="fas fa-sign-in-alt"></i> Войти
+                            </a>
+                            {% endif %}
+                        </li>
+                    </ul>
+                </nav>
             </div>
         </div>
-    </nav>
-    
-    <main class="container mt-4">
+    </header>
+
+    <!-- Основное содержимое -->
+    <main class="main-content">
         {% block content %}{% endblock %}
     </main>
-    
-    <footer class="bg-dark text-white mt-5 py-4">
-        <div class="container text-center">
-            <p>&copy; {% now "Y" %} PC Store</p>
+
+    <!-- Подвал сайта -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3 class="footer-title">PC STORE</h3>
+                    <p class="footer-text">Лучший выбор компьютерных комплектующих с 2024 года</p>
+                </div>
+                <div class="footer-section">
+                    <h3 class="footer-title">Контакты</h3>
+                    <p class="footer-text"><i class="fas fa-phone"></i> +7 (999) 123-45-67</p>
+                    <p class="footer-text"><i class="fas fa-envelope"></i> info@pcstore.ru</p>
+                    <p class="footer-text"><i class="fas fa-map-marker-alt"></i> Москва, ул. Компьютерная, 15</p>
+                </div>
+                <div class="footer-section">
+                    <h3 class="footer-title">Часы работы</h3>
+                    <p class="footer-text">Пн-Пт: 9:00-21:00</p>
+                    <p class="footer-text">Сб-Вс: 10:00-20:00</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; {% now "Y" %} PC STORE. Все права защищены.</p>
+            </div>
         </div>
     </footer>
+
+    {% block extra_js %}{% endblock %}
 </body>
 </html>
