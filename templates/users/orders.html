@@ -1,0 +1,380 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Мои заказы - PC Store{% endblock %}
+
+{% block content %}
+<div class="orders-container">
+    <div class="container">
+        <h1 class="page-title">Мои заказы</h1>
+        
+        {% if orders %}
+        <div class="orders-list detailed">
+            {% for order in orders %}
+            <div class="order-card detailed">
+                <div class="order-header">
+                    <div class="order-info">
+                        <span class="order-number">Заказ #{{ order.order_number }}</span>
+                        <span class="order-date">{{ order.created_at|date:"d.m.Y H:i" }}</span>
+                    </div>
+                    <div class="order-status {{ order.status }}">
+                        {{ order.get_status_display }}
+                    </div>
+                </div>
+                
+                <div class="order-details">
+                    <div class="order-section">
+                        <h3 class="order-section-title">Информация о доставке</h3>
+                        <div class="order-info-grid">
+                            <div class="order-info-item">
+                                <span class="order-info-label">Получатель:</span>
+                                <span class="order-info-value">{{ order.first_name }} {{ order.last_name }}</span>
+                            </div>
+                            <div class="order-info-item">
+                                <span class="order-info-label">Телефон:</span>
+                                <span class="order-info-value">{{ order.phone }}</span>
+                            </div>
+                            <div class="order-info-item">
+                                <span class="order-info-label">Email:</span>
+                                <span class="order-info-value">{{ order.email }}</span>
+                            </div>
+                            <div class="order-info-item">
+                                <span class="order-info-label">Адрес:</span>
+                                <span class="order-info-value">{{ order.address }}, {{ order.city }}, {{ order.postal_code }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="order-section">
+                        <h3 class="order-section-title">Состав заказа</h3>
+                        <div class="order-items-table">
+                            <div class="order-items-header">
+                                <div class="order-item-col product">Товар</div>
+                                <div class="order-item-col price">Цена</div>
+                                <div class="order-item-col quantity">Количество</div>
+                                <div class="order-item-col total">Сумма</div>
+                            </div>
+                            
+                            {% for item in order.items.all %}
+                            <div class="order-item-row">
+                                <div class="order-item-col product">
+                                    <div class="order-item-info">
+                                        <div class="order-item-name">{{ item.product_name }}</div>
+                                        {% if item.product %}
+                                        <div class="order-item-category">{{ item.product.category.name }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="order-item-col price">{{ item.price }} ₽</div>
+                                <div class="order-item-col quantity">{{ item.quantity }} шт.</div>
+                                <div class="order-item-col total">{{ item.get_total_price }} ₽</div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="order-section">
+                        <h3 class="order-section-title">Информация об оплате</h3>
+                        <div class="order-info-grid">
+                            <div class="order-info-item">
+                                <span class="order-info-label">Способ оплаты:</span>
+                                <span class="order-info-value">{{ order.get_payment_method_display }}</span>
+                            </div>
+                            <div class="order-info-item">
+                                <span class="order-info-label">Статус оплаты:</span>
+                                <span class="order-info-value">
+                                    {% if order.payment_completed %}
+                                    <span class="status-paid">Оплачено</span>
+                                    {% else %}
+                                    <span class="status-unpaid">Ожидает оплаты</span>
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="order-footer">
+                    <div class="order-total">
+                        <span class="total-label">Итого к оплате:</span>
+                        <span class="total-price">{{ order.total_price }} ₽</span>
+                    </div>
+                    <div class="order-actions">
+                        {% if not order.payment_completed %}
+                        <a href="#" class="btn btn-primary btn-small">Оплатить</a>
+                        {% endif %}
+                        <a href="#" class="btn btn-outline btn-small">Повторить заказ</a>
+                        <a href="#" class="btn btn-outline btn-small">Связаться с поддержкой</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        {% if orders.has_other_pages %}
+        <div class="pagination">
+            {% if orders.has_previous %}
+            <a href="?page={{ orders.previous_page_number }}" class="pagination-link">
+                <i class="fas fa-chevron-left"></i> Назад
+            </a>
+            {% endif %}
+            
+            {% for num in orders.paginator.page_range %}
+            {% if orders.number == num %}
+            <span class="pagination-link active">{{ num }}</span>
+            {% else %}
+            <a href="?page={{ num }}" class="pagination-link">{{ num }}</a>
+            {% endif %}
+            {% endfor %}
+            
+            {% if orders.has_next %}
+            <a href="?page={{ orders.next_page_number }}" class="pagination-link">
+                Далее <i class="fas fa-chevron-right"></i>
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        {% else %}
+        <div class="no-orders detailed">
+            <div class="no-orders-icon">
+                <i class="fas fa-shopping-bag"></i>
+            </div>
+            <h2>У вас пока нет заказов</h2>
+            <p>Совершите свой первый заказ и отслеживайте его статус здесь</p>
+            <a href="{% url 'products:catalog' %}" class="btn btn-primary">Перейти в каталог</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.orders-list.detailed {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.order-card.detailed {
+    background-color: white;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    box-shadow: 0 3px 15px var(--shadow-color);
+}
+
+.order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    background-color: var(--light-color);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.order-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.order-number {
+    font-weight: bold;
+    color: var(--dark-color);
+    font-size: 1.1rem;
+}
+
+.order-date {
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+}
+
+.order-details {
+    padding: 25px;
+}
+
+.order-section {
+    margin-bottom: 30px;
+}
+
+.order-section:last-child {
+    margin-bottom: 0;
+}
+
+.order-section-title {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    color: var(--dark-color);
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.order-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+}
+
+.order-info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.order-info-label {
+    font-weight: 500;
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+}
+
+.order-info-value {
+    color: var(--dark-color);
+}
+
+.status-paid {
+    color: var(--success-color);
+    font-weight: 500;
+}
+
+.status-unpaid {
+    color: var(--warning-color);
+    font-weight: 500;
+}
+
+.order-items-table {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.order-items-header {
+    display: grid;
+    grid-template-columns: 3fr 1fr 1fr 1fr;
+    background-color: var(--light-color);
+    padding: 15px;
+    font-weight: bold;
+    color: var(--dark-color);
+}
+
+.order-item-row {
+    display: grid;
+    grid-template-columns: 3fr 1fr 1fr 1fr;
+    padding: 15px;
+    border-top: 1px solid var(--border-color);
+    align-items: center;
+}
+
+.order-item-col {
+    padding: 0 10px;
+}
+
+.order-item-col.product {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.order-item-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.order-item-name {
+    font-weight: 500;
+    color: var(--dark-color);
+}
+
+.order-item-category {
+    font-size: 0.9rem;
+    color: var(--secondary-color);
+}
+
+.order-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    background-color: var(--light-color);
+    border-top: 1px solid var(--border-color);
+}
+
+.order-total {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.total-label {
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+}
+
+.total-price {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--dark-color);
+}
+
+.order-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.no-orders.detailed {
+    text-align: center;
+    padding: 60px 20px;
+    background-color: white;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.no-orders-icon {
+    font-size: 4rem;
+    color: var(--secondary-color);
+    margin-bottom: 20px;
+    opacity: 0.5;
+}
+
+.no-orders.detailed h2 {
+    font-size: 1.8rem;
+    margin-bottom: 15px;
+    color: var(--dark-color);
+}
+
+.no-orders.detailed p {
+    color: var(--secondary-color);
+    margin-bottom: 30px;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+@media (max-width: 768px) {
+    .order-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .order-items-header,
+    .order-item-row {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    
+    .order-footer {
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
+    }
+    
+    .order-actions {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}
+</style>
+{% endblock %}

@@ -14,11 +14,7 @@
                 <div class="profile-menu">
                     <div class="profile-info">
                         <div class="profile-avatar">
-                            {% if user.avatar %}
-                            <img src="{{ user.avatar.url }}" alt="{{ user.email }}">
-                            {% else %}
                             <i class="fas fa-user"></i>
-                            {% endif %}
                         </div>
                         <h3 class="profile-name">{{ user.get_full_name|default:user.email }}</h3>
                         <p class="profile-email">{{ user.email }}</p>
@@ -33,9 +29,6 @@
                         </a>
                         <a href="#" class="profile-nav-link">
                             <i class="fas fa-heart"></i> Избранное
-                        </a>
-                        <a href="#" class="profile-nav-link">
-                            <i class="fas fa-cog"></i> Настройки
                         </a>
                         <a href="{% url 'users:logout' %}" class="profile-nav-link">
                             <i class="fas fa-sign-out-alt"></i> Выйти
@@ -70,6 +63,11 @@
                         <div class="form-group">
                             <label class="form-label">Телефон</label>
                             <input type="tel" name="phone" value="{{ user.phone|default:'' }}" class="form-input">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Город</label>
+                            <input type="text" name="city" value="{{ user.city|default:'' }}" class="form-input" placeholder="Ваш город">
                         </div>
                         
                         <div class="form-group">

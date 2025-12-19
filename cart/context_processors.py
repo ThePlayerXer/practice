@@ -1,4 +1,4 @@
-﻿from django.conf import settings
+﻿from .utils import get_cart
 
 def cart(request):
-    return {'cart': request.session.get('cart', {})}
+    return {'cart': get_cart(request)}

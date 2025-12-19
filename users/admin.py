@@ -4,14 +4,14 @@ from .models import User
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
-    list_display = ['email', 'first_name', 'last_name', 'role', 'is_staff']
-    list_filter = ['role', 'is_staff', 'is_superuser']
-    search_fields = ['email', 'first_name', 'last_name']
+    list_display = ['email', 'first_name', 'last_name', 'is_staff', 'is_active']
+    list_filter = ['is_staff', 'is_superuser', 'is_active', 'date_joined']
+    search_fields = ['email', 'first_name', 'last_name', 'phone']
     
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
-        ('Персональная информация', {'fields': ('first_name', 'last_name', 'phone', 'address', 'avatar')}),
-        ('Роли и права', {'fields': ('role', 'is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
+        ('Персональная информация', {'fields': ('first_name', 'last_name', 'phone', 'address', 'city')}),
+        ('Права доступа', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
         ('Даты', {'fields': ('last_login', 'date_joined')}),
     )
     

@@ -45,6 +45,12 @@ class Product(models.Model):
     
     brand = models.CharField('Бренд', max_length=100, blank=True)
     model = models.CharField('Модель', max_length=100, blank=True)
+
+    def get_discount_percent(self):
+        if self.discount_price and self.price:
+            discount = ((self.price - self.discount_price) / self.price) * 100
+            return int(discount)
+        return 0
     
     class Meta:
         verbose_name = 'Товар'

@@ -96,3 +96,21 @@ LOGOUT_REDIRECT_URL = 'home'
 
 # Убираем эту строку, так как у нас нет cart.context_processors
 # CART_SESSION_ID = 'cart'
+# Настройки аутентификации
+LOGIN_URL = 'users:login'
+LOGIN_REDIRECT_URL = 'home'
+LOGOUT_REDIRECT_URL = 'home'
+
+# Настройки для сообщений
+from django.contrib.messages import constants as messages
+MESSAGE_TAGS = {
+    messages.SUCCESS: 'success',
+    messages.ERROR: 'error',
+    messages.WARNING: 'warning',
+    messages.INFO: 'info',
+    messages.DEBUG: 'debug',
+}
+
+# Настройки медиа файлов (для аватаров пользователей)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
