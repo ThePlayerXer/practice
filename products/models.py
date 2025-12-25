@@ -17,8 +17,6 @@ class Category(models.Model):
     name = models.CharField('Название', max_length=100)
     slug = models.SlugField('Slug', unique=True)
     category_type = models.CharField('Тип категории', max_length=20, choices=CATEGORY_TYPES)
-    description = models.TextField('Описание', blank=True)
-    image = models.ImageField('Изображение', upload_to='categories/', blank=True)
     
     class Meta:
         verbose_name = 'Категория'
@@ -26,9 +24,6 @@ class Category(models.Model):
     
     def __str__(self):
         return self.name
-    
-    def get_absolute_url(self):
-        return reverse('products:category_detail', args=[self.slug])
 
 class Product(models.Model):
     name = models.CharField('Название', max_length=200)
@@ -40,17 +35,10 @@ class Product(models.Model):
     stock = models.PositiveIntegerField('Количество на складе')
     is_available = models.BooleanField('Доступен', default=True)
     created_at = models.DateTimeField('Дата создания', auto_now_add=True)
-    updated_at = models.DateTimeField('Дата обновления', auto_now=True)
-    image = models.ImageField('Основное изображение', upload_to='products/')
+    image = models.ImageField('Изображение', upload_to='products/', blank=True, null=True)
     
     brand = models.CharField('Бренд', max_length=100, blank=True)
     model = models.CharField('Модель', max_length=100, blank=True)
-
-    def get_discount_percent(self):
-        if self.discount_price and self.price:
-            discount = ((self.price - self.discount_price) / self.price) * 100
-            return int(discount)
-        return 0
     
     class Meta:
         verbose_name = 'Товар'
@@ -64,19 +52,12 @@ class Product(models.Model):
         return reverse('products:product_detail', args=[self.slug])
     
     def get_final_price(self):
+        """Возвращает окончательную цену (со скидкой если есть)"""
         return self.discount_price if self.discount_price else self.price
     
-    def is_in_stock(self):
-        return self.stock > 0
-
-class ProductImage(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
-    image = models.ImageField('Изображение', upload_to='products/')
-    alt_text = models.CharField('Альтернативный текст', max_length=200, blank=True)
-    
-    class Meta:
-        verbose_name = 'Изображение товара'
-        verbose_name_plural = 'Изображения товаров'
-    
-    def __str__(self):
-        return f"Изображение для {self.product.name}"
+    def get_discount_percent(self):
+        """Возвращает процент скидки"""
+        if self.discount_price and self.price:
+            discount = ((self.price - self.discount_price) / self.price) * 100
+            return int(discount)
+        return 0
